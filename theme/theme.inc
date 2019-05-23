@@ -91,14 +91,29 @@ function template_preprocess_islandora_internet_archive_bookreader(array &$varia
       'mobilize' => variable_get('islandora_internet_archive_bookreader_mobile_full_screen', FALSE),
       'content_type' => variable_get('islandora_internet_archive_bookreader_content_type', 'book'),
       'hasCover' => $hascover,
+      'image_max_width' => variable_get('islandora_internet_archive_bookreader_image_max_width', '800'),
     ) + $page_source_settings,
   );
 
+/**
+ *      IABR enhanced for mobile
+ */
+  $metamobile = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+       'name' => 'viewport',
+       'content' => 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
+    ),
+  );
+  drupal_add_html_head($metamobile, 'metamobile');  
+  
+  
   drupal_add_js($data_array, 'setting');
   drupal_add_css("$library_path/BookReader/BookReader.css", array(
     'group' => CSS_SYSTEM,
   ));
   drupal_add_css("$module_path/css/islandora_internet_archive_bookreader.css");
+  drupal_add_css("$module_path/css/jquery.mmenu.css");
   // Included jQuery 1.4.2 and jQueryUI 1.8.5 are not being used in favor of
   // the Drupal system versions.
   drupal_add_library('system', 'effects');
@@ -118,17 +133,11 @@ function template_preprocess_islandora_internet_archive_bookreader(array &$varia
       'weight' => -6,
     )
   );
-  // Add the required jQuery version, specifying weight.
-  drupal_add_js("$module_path/js/jquery_1_5.min.js", array(
+  drupal_add_js("$library_path/BookReader/mmenu/dist/js/jquery.mmenu.all.min.js", array(
     'group' => JS_LIBRARY,
     'weight' => -6,
   ));
-  // We also need to be sure to use the correct jquery ui version.
-  drupal_add_js("$module_path/js/jquery.ui-1.8.10/jquery-ui.min.js", array(
-    'group' => JS_LIBRARY,
-    'weight' => -6,
-  ));
-  drupal_add_js("$library_path/BookReader/dragscrollable.js", array(
+  drupal_add_js("$library_path/BookReader/dragscrollable-br.js", array(
     'group' => JS_LIBRARY,
     'weight' => -6,
   ));
@@ -189,6 +198,8 @@ function template_preprocess_islandora_internet_archive_bookreader(array &$varia
  */
 function theme_islandora_internet_archive_bookreader_book_info(array $variables) {
   module_load_include('inc', 'islandora', 'includes/metadata');
+  //--Name of Views or empty for default info tab
+  $infoTab_views = variable_get('islandora_internet_archive_bookreader_info_views', '');
 
   $object = $variables['object'];
 
@@ -196,11 +207,14 @@ function theme_islandora_internet_archive_bookreader_book_info(array $variables)
   // metadata in printable form.
   $metadata = islandora_retrieve_metadata_markup($object, TRUE);
   $viewer = variable_get('islandora_metadata_display', 'dublin_core');
+
+  //--info_views empty = default
+  if ($infoTab_views == '') {
+
   // Let's default back to what IAV had before for a default.
   if ($viewer != 'dublin_core' && $metadata) {
     $content = $metadata;
-  }
-  else {
+    } else {
     $fields = islandora_internet_archive_bookreader_info_fields($object);
     $convert_to_string = function ($o) {
       return implode('<br/>', $o);
@@ -217,6 +231,16 @@ function theme_islandora_internet_archive_bookreader_book_info(array $variables)
       'sticky' => FALSE,
     ));
   }
+
+  }
+  //--info_views not empty = use Views (PID passed to views as contextual variable)
+  else {
+    $args = array($object->id);
+    $view = views_get_view($infoTab_views);
+    $content=$view->preview('default', $args);
+  }
+	  
+	  
   return $content;
 }
 

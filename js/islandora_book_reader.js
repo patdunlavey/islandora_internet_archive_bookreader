@@ -88,7 +88,7 @@
     return this.settings.searchUri != null;
   }
 
-/**
+  /**
  *
  * Overrided here to enable fullscreen button, maybe a better metod to do it
  *
@@ -615,19 +615,31 @@ IslandoraBookReader.prototype.blankFulltextDiv = function() {
       // If pageProgression is not set RTL we assume it is LTR
       if (0 == (index & 0x1)) {
         // Even-numbered page
+        if (false === this.hasCover) {
+          return 'L';
+        }
         return 'R';
       }
       else {
         // Odd-numbered page
+         if (false === this.hasCover) {
+          return 'R';
+        }
         return 'L';
       }
     }
     else {
       // RTL
       if (0 == (index & 0x1)) {
+       if (false === this.hasCover) {
+          return 'R';
+        }
         return 'L';
       }
       else {
+        if (false === this.hasCover) {
+          return 'L';
+        }
         return 'R';
       }
     }
@@ -807,7 +819,7 @@ IslandoraBookReader.prototype.blankFulltextDiv = function() {
       }
     }
   }
- 
+
   /**
    * Toggle fullscreen viewer.
    */
@@ -815,7 +827,7 @@ IslandoraBookReader.prototype.blankFulltextDiv = function() {
     this.fullscreen = (this.fullscreen ? false : true);
     if(this.fullscreen) {
       var top = '0';
-      if ( $("#admin-menu").length) {
+      if ($("#admin-menu").length) {
         var admin_bar_height = $("#admin-menu").height();
         top = admin_bar_height + "px";
       }
@@ -858,22 +870,22 @@ IslandoraBookReader.prototype.blankFulltextDiv = function() {
       top = admin_bar_height + "px";
     }
     $('div#book-viewer').css({
-        'position': 'fixed',
-        'width': '100%',
-        'height': '100%',
-        'left': '0',
-        'top': top,
+      'position': 'fixed',
+      'width': '100%',
+      'height': '100%',
+      'left': '0',
+      'top': top,
         'margin': '0',
         'padding': '0',
         'z-index': '1'
-      });
+    });
       $('div#BookReader').css({
-        'height': '100%'
-      });
+      'height': '100%'
+    });
       this.resize();
   }
 
-  
+
   /**
    * Window resize event callback, handles admin menu
    * in Drupal.
@@ -895,26 +907,26 @@ IslandoraBookReader.prototype.blankFulltextDiv = function() {
       });
 
       this.resize();
-    }
   }
-  
+  }
+
   // Resizes the inner container to fit within the visible space to prevent
   // the top toolbar and bottom navbar from clipping the visible book
   IslandoraBookReader.prototype.resizeBRcontainer = function() {
     // Runs only if promise was fullfilled, so we are safe here
 	if ($('#BRnavCntlBtm').hasClass('BRup')) {
 		$('#BookReader').css({ overflow : 'hidden',
-		});	
-	} else {
+            });
+    } else {
 		$('#BookReader').css({ overflow : 'visible',
-		});	
-	}
+              });
+      }
 	$('#BRcontainer').css({
       top: this.getToolBarHeight(),
       bottom: this.getNavHeight(),
     });
   }
-  
+
   // setupTooltips()
   //______________________________________________________________________________
   IslandoraBookReader.prototype.setupTooltips = function() {
@@ -932,9 +944,9 @@ IslandoraBookReader.prototype.blankFulltextDiv = function() {
             fontSize: '1.25em',
             whiteSpace: 'nowrap'
           },
-        }
+    }
       )
       ;
-  }
-  
+      }
+
 })(jQuery);
